@@ -53,7 +53,7 @@ entries_all.group_by {|e| identifier_fields.collect {|n| e[n]}.compact.join("|")
   
   entries_for_recip.each_with_index do |entry, i|
     # raise entry.inspect
-    m,d,y = entry["RecordedDate"].split(" ")[0].split("/")
+    y,m,d = entry["RecordedDate"].split(" ")[0].split(/\-/)
     date = Date.new(y.to_i < 2000 ? (2000 + y.to_i) : y.to_i, m.to_i, d.to_i)
     output_filename = "#{recip.gsub(/\W+/, "_") }/#{"#{recip} #{ date.strftime("%F") }_n#{i}".gsub(/\W+/, "_") }"
 
