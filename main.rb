@@ -20,6 +20,14 @@ def generate_template(n_questions)
     .gsub("_ANSWER1_", "_ANSWER1_#{ new_rows.join("")}")
 end
   
+  # rtf does not like non-ASCII chaacters
+def escape(str)
+  if str
+    str.encode(Encoding.find("ASCII"), {invalid: :replace, undef: :replace, replce: "", universal_newline: true}) 
+  else
+    str
+  end
+end
 
 raw = CSV.read(ARGV[0], headers: true )
 
@@ -60,17 +68,17 @@ entries_all.group_by {|e| identifier_fields.collect {|n| e[n]}.compact.join("|")
     fields_to_write = entry.select {|k,v| show_fields.include?(k) and v}
     
     template = generate_template(fields_to_write.size)
-        .gsub("_RESIDENT_NAME_", recip)
-        .gsub("_ATTENDING_NAME_", entry["Q30"])
-        .gsub("_DATE_", entry["RecordedDate"])
-        .gsub("_DOMAIN_", entry["Q14"])
-    
-    i = 1
+        .gsub("_RESIDENT_NAME_", escape( recip ))
+        .gsub("_ATTENDING_NAME_", escape( entry["Q30"] ))
+        .gsub("_DATE_", escape( entry["RecordedDate"] ))
+        .gsub("_DOMAIN_", escape( entry["Q14"] ))
+
+    q = 1
     fields_to_write.each do |k,v|
       # puts "#{questions[k]}: #{v}"
-      template.gsub!("_QUESTION#{i}_", questions[k]).gsub!("_ANSWER#{i}_", v)
-        
-        i += 1
+      template.gsub!("_QUESTION#{q}_", escape( questions[k]) )
+      template.gsub!("_ANSWER#{q}_", escape( v) )
+      q += 1
     end
     
     File.write("output/#{output_filename}.rtf", template )
